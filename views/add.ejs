@@ -1,0 +1,99 @@
+<%- include('partials/header') %>
+
+<!-- Admin password modal for access control -->
+<div id="passwordModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Admin Access</h2>
+    </div>
+    <div class="modal-body">
+      <div style="position: relative;">
+        <input type="password" id="passwordInput" class="modal-input" placeholder="Enter admin password" autofocus style="padding-right: 3rem;">
+        <!-- Toggle password visibility -->
+        <span onclick="togglePassword()" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--muted-ink); user-select: none;">👁️</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn primary" onclick="checkPassword()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Admin password passed from server (stored in .env)
+    const SECRET = '<%= adminPassword %>'
+    
+    // Verify user entered correct password
+    function checkPassword() {
+        const userEntry = document.getElementById('passwordInput').value;
+        if (userEntry !== SECRET) {
+            alert("Incorrect password!");
+            window.location.href = "/";
+        } else {
+            // Hide modal and allow access to form
+            document.getElementById('passwordModal').style.display = 'none';
+        }
+    }
+    
+    // Toggle password visibility
+    function togglePassword() {
+        const input = document.getElementById('passwordInput');
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+    
+    // Allow Enter key to submit password
+    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') checkPassword();
+    });
+</script>
+
+<!-- Book add/edit form -->
+<div class="container form-page">
+    <h1 class="form-title"></h1>
+
+    <!-- Form action and method determined by server (add or edit) -->
+    <form action="<%= action %>" method="POST" class="book-form">
+        <div class="form-group">
+            <label>Title</label>
+            <input type="text" name="title" value="<%= book ? book.title : '' %>" required>
+        </div>
+
+        <div class="form-group">
+            <label>Author</label>
+            <input type="text" name="author" value="<%= book ? book.author : '' %>" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Rating (1-10)</label>
+                <!-- Dropdown with ratings 10 to 1 -->
+                <select name="rating" required>
+                    <% for(let i = 10; i >= 1; i--) { %>
+                        <option value="<%= i %>" <%= book && book.rating == i ? 'selected' : '' %>><%= i %></option>
+                    <% } %>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date read</label>
+                <input type="date" name="date_read" value="<%= book ? book.date_read : '' %>" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea name="notes" rows="10" required><%= book ? book.notes : '' %></textarea>
+        </div>
+
+        <!-- Submit button text changes based on add/edit mode -->
+        <button type="submit" class="btn btn-primary btn-large"><%= submitText %></button>
+    </form>
+
+    <!-- Delete button only shown when editing existing book -->
+    <% if (locals.deleteAction) { %>
+       <form action="<%= deleteAction %>" method="POST" style="margin-top: 10px;">
+           <button type="submit" class="btn btn-secondary btn-large">Delete</button>
+       </form>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
