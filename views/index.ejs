@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <!-- Page header with book count and sorting options -->
+    <div class="page-header">
+    <h1>Books I've Read (<%= books.length %>)</h1>
+    
+    <!-- Dropdown to sort books by rating, date, or title -->
+    <div class="sort-container">
+        <label for="sort-select">Sort by:</label>
+        <select id="sort-select" onchange="window.location.href=this.value">
+            <option value="/?sort=rating" <%= currentSort === 'rating' ? 'selected' : '' %>>Best first</option>
+            <option value="/?sort=date"   <%= currentSort === 'date'   ? 'selected' : '' %>>Newest first</option>
+            <option value="/?sort=title"  <%= currentSort === 'title'  ? 'selected' : '' %>>A–Z</option>
+        </select>
+    </div>
+    </div>
+
+    <!-- Grid of book cards -->
+    <div class="book-grid">
+        <% books.forEach(book => { %>
+            <!-- Each book card links to edit page -->
+            <a href="/book/<%= book.id %>" class="book-card">
+                <!-- Book cover from Open Library API -->
+                <div class="cover">
+                    <img src="https://covers.openlibrary.org/b/isbn/<%= book.isbn %>-L.jpg" 
+                         alt="<%= book.title %> cover"
+                         onerror="this.src='https://via.placeholder.com/200x300?text=No+Cover'">
+                </div>
+                <!-- Book information -->
+                <div class="book-info">
+                    <h2 class="book-title"><%= book.title %></h2>
+                    <p class="book-author"><%= book.author %></p>
+                    
+                    <!-- Star rating display (converts 10-point to 5-star) -->
+                    <div class="rating">
+                        <% for(let i = 1; i <= 5; i++) { %>
+                            <span class="star <%= i <= Math.round(book.rating / 2) ? 'filled' : '' %>">★</span>
+                        <% } %>
+                        <span class="rating-number"><%= book.rating %>/10</span>
+                    </div>
+                    <span class="date"><%= book.date_read %></span>
+                </div>
+            </a>
+        <% }) %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
